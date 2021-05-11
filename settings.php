@@ -2,7 +2,7 @@
 /**
  * Adds admin settings for the plugin.
  *
- * @package     unilformationpers
+ * @package     formationsapi
  * @category    admin
  */
 
@@ -10,11 +10,21 @@
 defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
-    $ADMIN->add('localplugins', new admin_category('local_unilformationpers_settings', get_string('pluginname', 'local_unilformationpers')));
-    $settingspage = new admin_settingpage('manageunilformationpers', get_string('UnilFormationPers', 'local_unilformationpers'));
+    $settingspage = new admin_settingpage(
+        'manageformationsapi',
+        get_string('pluginname', 'local_formationsapi')
+    );
 
     if ($ADMIN->fulltree) {
-
+        $settingspage->add(
+            new admin_setting_configtext(
+                'local_formationsapi/course_category_id',
+                get_string('category_setting_description', 'local_formationsapi'),
+                '',
+                '1',
+                PARAM_INT
+            )
+        );
     }
 
     $ADMIN->add('localplugins', $settingspage);
