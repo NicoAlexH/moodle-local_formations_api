@@ -19,18 +19,21 @@ class local_formationsapi_observer
             MUST_EXIST
         );
         $course_completion_percentage = progress::get_course_progress_percentage($course_object, $user->id);
+        if (!is_null($course_completion_percentage)) {
+            $url = get_config('local_formationsapi', 'update_user_call_url');
+            if (!$url) {
+                throw new invalid_parameter_exception('API endpoint for updating users is not set.');
+            }
+            $data = [
+                'user_email' => $user->email,
+                'course_id' => $course_id,
+                'status_percent' => $course_completion_percentage
+            ];
 
-        $url = get_config('local_formationsapi', 'update_user_call_url');
-        if (!$url) {
-            throw new invalid_parameter_exception('API endpoint for updating users is not set.');
+            return self::call_api('POST', $url, $data);
         }
-        $data = [
-            'user_email' => $user->email,
-            'course_id' => $course_id,
-            'status_percent' => $course_completion_percentage
-        ];
 
-        return self::call_api('POST', $url, $data);
+        return null;
     }
 
     /**
