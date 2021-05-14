@@ -25,9 +25,6 @@ class local_formationsapi_observer
             'status_percent' => $course_completion_percentage
         ];
 
-        var_dump(self::call_api('POST', $url, $data));
-        die;
-
         return self::call_api('POST', $url, $data);
     }
 
