@@ -4,7 +4,7 @@ $services = [
         'functions' => ['local_formationsapi_create_course', 'local_formationsapi_enrol_user'], // web service functions of this service
         'requiredcapability' => '',                // if set, the web service user need this capability to access
         // any function of this service. For example: 'some/capability:specified'
-        'restrictedusers' => 0,                                             // if enabled, the Moodle administrator must link some user to this service
+        'restrictedusers' => 1,                                             // if enabled, the Moodle administrator must link some user to this service
         // into the administration
         'enabled' => 1,                                                       // if enabled, the service can be reachable on a default installation
         'shortname' =>  'formationsapiservice',       // optional – but needed if restrictedusers is set so as to allow logins.
