@@ -32,6 +32,6 @@ $functions = [
         'description' => 'Add user to course.',    //human readable description of the web service function
         'type'        => 'write',                  //database rights of the web service function (read, write)
         'ajax' => true,        // is the service available to 'internal' ajax calls.
-        'capabilities' => '', // comma separated list of capabilities used by the function.
+        'capabilities' => 'enrol/manual:enrol', // comma separated list of capabilities used by the function.
     ],
 ];

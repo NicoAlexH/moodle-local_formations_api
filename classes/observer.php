@@ -12,9 +12,11 @@ class local_formationsapi_observer
         $event_data = $event->get_data();
         $course_id = $event_data['courseid'];
         $course_completion_percentage = self::get_course_completion_percentage($event_data['userid'], $course_id);
-        $user = $DB->get_record('user', [
-            'id' => $user_id = $event_data['userid']
-        ]);
+        $user = $DB->get_record('user',
+            ['id' => $user_id = $event_data['userid']],
+            '*',
+            MUST_EXIST
+        );
         $url = get_config('local_formationsapi', 'update_user_call_url');
         if (!$url) {
             throw new invalid_parameter_exception('API endpoint for updating users is not set.');
@@ -44,10 +46,13 @@ class local_formationsapi_observer
         return 100 * ($completed_activities / count($activities));
     }
 
-    // Method: POST, PUT, GET etc
-// Data: array("param" => "value") ==> index.php?param=value
-
-    private static function call_api($method, $url, $data = false)
+    /**
+     * @param string $method POST | PUT
+     * @param string $url
+     * @param array $data
+     * @return bool|string
+     */
+    private static function call_api($method, $url, $data = [])
     {
         $curl = curl_init();
 
@@ -63,21 +68,39 @@ class local_formationsapi_observer
                 curl_setopt($curl, CURLOPT_PUT, 1);
                 break;
             default:
-                if ($data)
-                    $url = sprintf("%s?%s", $url, http_build_query($data));
+                throw new moodle_exception('invalid call');
         }
 
         // Optional Authentication:
         /*curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
         curl_setopt($curl, CURLOPT_USERPWD, "username:password");*/
-
+        curl_setopt($curl, CURLOPT_TIMEOUT_MS, 10000);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 
-        $result = curl_exec($curl);
+        $output = curl_exec($curl);
+        $curl_errno = curl_errno($curl); // 0 if fine
+        $response_details = curl_getinfo($curl);
 
         curl_close($curl);
 
-        return $result;
+        if ($output === false) {
+            if ($curl_errno) {
+                print_error('CURL REQUEST ERROR ' . $curl_errno . ' while calling ' . $url);
+            }
+
+            return false;
+        }
+
+        try {
+            $return = json_decode($output);
+        } catch (Exception $e) {
+            print_error('api_fail', 'exam', null, $e->getMessage() . $e->getCode());
+
+            return false;
+        }
+
+        return $return;
     }
 }

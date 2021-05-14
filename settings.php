@@ -18,15 +18,6 @@ if ($hassiteconfig) {
     if ($ADMIN->fulltree) {
         $settingspage->add(
             new admin_setting_configtext(
-                'local_formationsapi/course_category_id',
-                get_string('category_setting_description', 'local_formationsapi'),
-                '',
-                '1',
-                PARAM_INT
-            )
-        );
-        $settingspage->add(
-            new admin_setting_configtext(
                 'local_formationsapi/update_user_call_url',
                 get_string('update_user_call_url_description', 'local_formationsapi'),
                 '',

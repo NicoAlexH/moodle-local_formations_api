@@ -14,7 +14,8 @@ class local_formationsapi_api extends external_api
     public static function create_course_returns(): external_single_structure
     {
         return new external_single_structure([
-            'course_id' => new external_value(PARAM_INT, 'ID of the created course')
+            'course_id' => new external_value(PARAM_INT, 'ID of the created course'),
+            'course_url' => new external_value(PARAM_URL, 'URL of the created course')
         ]);
     }
 
@@ -34,31 +35,33 @@ class local_formationsapi_api extends external_api
      * @throws \moodle_exception
      * @returns course course
      */
-    public function create_course($course_title, $category_id_number): ?array
+    public function create_course($course_title, $category_name): ?array
     {
         global $DB;
+
+        self::validate_parameters(self::create_course_parameters(), [
+            'course_title' => $course_title,
+            'category_name' => $category_name
+        ]);
+
         $cat_id = $DB
             ->get_record(
                 'course_categories',
-                ['idnumber' => $category_id_number],
+                ['idnumber' => $category_name],
                 '*',
                 MUST_EXIST
             )
             ->id;
-
-        self::validate_parameters(self::create_course_parameters(), [
-            'course_title' => $course_title,
-            'category_id_number' => $category_id_number
-        ]);
 
         $data = (object)[
             'fullname' => $course_title,
             'category' => (int)$cat_id,
             'enablecompletion' => 1
         ];
+        $data->id = (int)create_course($data)->id;
+        $DB->update_record('course', $data);
 
-        //TODO add completion tracking
-        return ['course_id' => (int)create_course($data)->id];
+        return ['course_id' => $data->id, 'course_url' => (string)new moodle_url('/course/view.php', ['id' => $data->id])];
     }
 
     /**
@@ -67,14 +70,9 @@ class local_formationsapi_api extends external_api
      */
     public static function create_course_parameters(): external_function_parameters
     {
-        $course_category_id = get_config('local_formationsapi', 'course_category_id');
-        if (empty($course_category_id)) {
-            throw new invalid_parameter_exception('Course category id not set in plugin settings.');
-        }
-
         return new external_function_parameters([
             'course_title' => new external_value(PARAM_RAW_TRIMMED, ''),
-            'category_id_number' => new external_value(PARAM_ALPHANUM, '', VALUE_DEFAULT, $course_category_id)
+            'category_name' => new external_value(PARAM_ALPHANUM, '')
         ]);
     }
 
@@ -96,8 +94,10 @@ class local_formationsapi_api extends external_api
             'role_shortname' => $role_shortname
         ]);
 
+        $user_email = strtolower($user_email);
+
         $user = $DB->get_record('user', [
-            'username' => strtolower($user_email),
+            'username' => $user_email,
             'auth' => 'shibboleth',
             'suspended' => 0,
             'deleted' => 0
@@ -121,9 +121,7 @@ class local_formationsapi_api extends external_api
             'user_lastname' => new external_value(PARAM_RAW_TRIMMED, 'User lastname'),
             'course_id' => new external_value(PARAM_INT, 'Course title'),
             'role_shortname' => new external_value(
-                PARAM_ALPHANUM, 'Role shortname to assign to the user (default: student)',
-                VALUE_DEFAULT,
-                'student'
+                PARAM_ALPHA, 'Role shortname to assign to the user (student|teacher)'
             )
         ]);
     }
