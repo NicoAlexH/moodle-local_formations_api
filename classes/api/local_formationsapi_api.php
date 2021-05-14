@@ -119,7 +119,7 @@ class local_formationsapi_api extends external_api
             'user_email' => new external_value(PARAM_EMAIL, 'User email'),
             'user_firstname' => new external_value(PARAM_RAW_TRIMMED, 'User firstname'),
             'user_lastname' => new external_value(PARAM_RAW_TRIMMED, 'User lastname'),
-            'course_id' => new external_value(PARAM_INT, 'Course title'),
+            'course_id' => new external_value(PARAM_INT, 'Course ID'),
             'role_shortname' => new external_value(
                 PARAM_ALPHA, 'Role shortname to assign to the user (student|teacher)'
             )
