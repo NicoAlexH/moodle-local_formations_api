@@ -5,8 +5,7 @@ use core_completion\progress;
 class local_formationsapi_observer
 {
     /**
-     * @throws \dml_exception
-     * @throws \invalid_parameter_exception
+     * @throws \invalid_parameter_exception|\moodle_exception
      */
     public static function update_user_profile(core\event\base $event)
     {
@@ -14,7 +13,6 @@ class local_formationsapi_observer
         $event_data = $event->get_data();
         $course_id = $event_data['courseid'];
         $course_object = $DB->get_record('course', ['id' => $course_id]);
-        //$course_completion_percentage = self::get_course_completion_percentage($event_data['userid'], $course_id);
         $user = $DB->get_record('user',
             ['id' => $user_id = $event_data['userid']],
             '*',
@@ -40,6 +38,7 @@ class local_formationsapi_observer
      * @param string $url
      * @param array $data
      * @return bool|string
+     * @throws \moodle_exception
      */
     private static function call_api($method, $url, $data = [])
     {
@@ -70,13 +69,12 @@ class local_formationsapi_observer
 
         $output = curl_exec($curl);
         $curl_errno = curl_errno($curl); // 0 if fine
-        $response_details = curl_getinfo($curl);
 
         curl_close($curl);
 
         if ($output === false) {
             if ($curl_errno) {
-                print_error('CURL REQUEST ERROR ' . $curl_errno . ' while calling ' . $url);
+                throw new moodle_exception('CURL REQUEST ERROR ' . $curl_errno . ' while calling ' . $url);
             }
 
             return false;
@@ -85,9 +83,7 @@ class local_formationsapi_observer
         try {
             $return = json_decode($output);
         } catch (Exception $e) {
-            print_error('api_fail', 'exam', null, $e->getMessage() . $e->getCode());
-
-            return false;
+            throw new moodle_exception('api_fail : ' . $e->getMessage() . $e->getCode());
         }
 
         return $return;
