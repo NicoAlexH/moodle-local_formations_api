@@ -1,5 +1,7 @@
 <?php
 
+use core_completion\progress;
+
 class local_formationsapi_observer
 {
     /**
@@ -11,12 +13,15 @@ class local_formationsapi_observer
         global $DB;
         $event_data = $event->get_data();
         $course_id = $event_data['courseid'];
-        $course_completion_percentage = self::get_course_completion_percentage($event_data['userid'], $course_id);
+        $course_object = $DB->get_record('course', ['id' => $course_id]);
+        //$course_completion_percentage = self::get_course_completion_percentage($event_data['userid'], $course_id);
         $user = $DB->get_record('user',
             ['id' => $user_id = $event_data['userid']],
             '*',
             MUST_EXIST
         );
+        $course_completion_percentage = progress::get_course_progress_percentage($course_object, $user->id);
+
         $url = get_config('local_formationsapi', 'update_user_call_url');
         if (!$url) {
             throw new invalid_parameter_exception('API endpoint for updating users is not set.');
@@ -28,22 +33,6 @@ class local_formationsapi_observer
         ];
 
         return self::call_api('POST', $url, $data);
-    }
-
-    private static function get_course_completion_percentage($user_id, $course_id)
-    {
-        global $DB, $CFG;
-        require_once("{$CFG->libdir}/completionlib.php");
-
-        $course_object = $DB->get_record('course', ['id' => $course_id]);
-        $cinfo = new completion_info($course_object);
-        $activities = $cinfo->get_progress_all()[$user_id]->progress;
-        $completed_activities = 0;
-        foreach ($activities as $activity) {
-            $completed_activities += $activity->completionstate;
-        }
-
-        return 100 * ($completed_activities / count($activities));
     }
 
     /**
