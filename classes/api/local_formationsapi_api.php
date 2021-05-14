@@ -6,7 +6,7 @@ require_once($CFG->libdir . '/externallib.php');
 require_once($CFG->dirroot . '/course/lib.php');
 
 
-class api extends external_api
+class local_formationsapi_api extends external_api
 {
     /**
      * @return \external_single_structure
@@ -53,9 +53,11 @@ class api extends external_api
 
         $data = (object)[
             'fullname' => $course_title,
-            'category' => (int)$cat_id
+            'category' => (int)$cat_id,
+            'enablecompletion' => 1
         ];
 
+        //TODO add completion tracking
         return ['course_id' => (int)create_course($data)->id];
     }
 
@@ -166,6 +168,7 @@ class api extends external_api
         global $DB;
 
         $context = context_course::instance($course_id);
+
         if (!is_enrolled($context, $user_id)) {
             $plugin_instance = $DB->get_record("enrol", ['courseid' => $course_id, 'enrol' => 'manual']);
             $plugin = enrol_get_plugin('manual');

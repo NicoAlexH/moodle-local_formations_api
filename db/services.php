@@ -15,9 +15,9 @@ $services = [
 
 $functions = [
     'local_formationsapi_create_course' => [         //web service function name
-        'classname'   => 'api',  //class containing the external function OR namespaced class in classes/external/XXXX.php
+        'classname'   => 'local_formationsapi_api',  //class containing the external function OR namespaced class in classes/external/XXXX.php
         'methodname'  => 'create_course',          //external function name
-        'classpath'   => 'local/formationsapi/classes/api/api.php',  //file containing the class/external function - not required if using namespaced auto-loading classes.
+        'classpath'   => 'local/formationsapi/classes/api/local_formationsapi_api.php',  //file containing the class/external function - not required if using namespaced auto-loading classes.
         // defaults to the service's externalib.php
         'description' => 'Creates new course.',    //human readable description of the web service function
         'type'        => 'write',                  //database rights of the web service function (read, write)
@@ -25,9 +25,9 @@ $functions = [
         'capabilities' => 'moodle/course:create', // comma separated list of capabilities used by the function.
     ],
     'local_formationsapi_enrol_user' => [         //web service function name
-        'classname'   => 'api',  //class containing the external function OR namespaced class in classes/external/XXXX.php
+        'classname'   => 'local_formationsapi_api',  //class containing the external function OR namespaced class in classes/external/XXXX.php
         'methodname'  => 'enrol_user',          //external function name
-        'classpath'   => 'local/formationsapi/classes/api/api.php',  //file containing the class/external function - not required if using namespaced auto-loading classes.
+        'classpath'   => 'local/formationsapi/classes/api/local_formationsapi_api.php',  //file containing the class/external function - not required if using namespaced auto-loading classes.
         // defaults to the service's externalib.php
         'description' => 'Add user to course.',    //human readable description of the web service function
         'type'        => 'write',                  //database rights of the web service function (read, write)

@@ -25,6 +25,15 @@ if ($hassiteconfig) {
                 PARAM_INT
             )
         );
+        $settingspage->add(
+            new admin_setting_configtext(
+                'local_formationsapi/update_user_call_url',
+                get_string('update_user_call_url_description', 'local_formationsapi'),
+                '',
+                '',
+                PARAM_URL
+            )
+        );
     }
 
     $ADMIN->add('localplugins', $settingspage);
