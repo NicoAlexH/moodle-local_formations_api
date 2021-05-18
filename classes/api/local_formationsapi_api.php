@@ -33,7 +33,7 @@ class local_formationsapi_api extends external_api
      * Creates new course
      *
      * @throws \moodle_exception
-     * @returns course course
+     * @returns array[course_id, course_url]
      */
     public function create_course($course_title, $category_name): ?array
     {
@@ -113,6 +113,9 @@ class local_formationsapi_api extends external_api
         return ['success' => self::enrol_user_in_course($user->id, $course_id, $role->id)];
     }
 
+    /**
+     * @return \external_function_parameters
+     */
     public static function enrol_user_parameters(): external_function_parameters
     {
         return new external_function_parameters([
