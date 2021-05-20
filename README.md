@@ -2,13 +2,13 @@
 
 This plugin exposes two new API endpoints :
 
-- **local_formationsapi_create_course (String course_title, String category_id_number): course_id**
+- **local_formationsapi_create_course (String course_title, String category_name): course_id**
 
-This method allows to create a new course by specifying a title and the numberid of an existing course_category. It returns the id of the created course.
+This method allows to create a new course by specifying a title and the name of an existing course_category. It returns the id of the created course.
 
 Example call :
 
-`curl '[MOODLE_URL]/webservice/rest/server.php?wstoken=[YOUR_TOKEN]&wsfunction=local_formationsapi_create_course&course_title=toto&category_id_number=test&moodlewsrestformat=json'`
+`curl '[MOODLE_URL]/webservice/rest/server.php?wstoken=[YOUR_TOKEN]&wsfunction=local_formationsapi_create_course&course_title=toto&category_name=test&moodlewsrestformat=json'`
 
 returns 
 
