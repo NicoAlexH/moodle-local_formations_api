@@ -26,6 +26,3 @@ Example call :
 returns 
 
 `{"success": true}`
-
-
-*
