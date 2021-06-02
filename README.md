@@ -2,7 +2,7 @@
 
 This plugin exposes two new API endpoints :
 
-- **local_formationsapi_create_course (String course_title, String category_name): course_id**
+- **local_formationsapi_create_course (String course_title, String conference_course_id, String category_name): course_id**
 
 This method allows to create a new course by specifying a title and the name of an existing course_category. It returns the id of the created course.
 
@@ -12,8 +12,7 @@ Example call :
 
 returns 
 
-`{"course_id":3}`
-
+`{"course_id":3, "url": "[MOODLE_URL]/auth/shibboleth/index.php?target=[MOODLE_URL]/course/view.php?id=3"}`
 
 
 - **local_formationsapi_enrol_user(String user_email, String user_firstname, String user_lastname, Int course_id, String role_shortname): success**
