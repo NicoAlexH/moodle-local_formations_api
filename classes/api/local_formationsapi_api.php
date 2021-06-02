@@ -29,6 +29,13 @@ class local_formationsapi_api extends external_api
         ]);
     }
 
+    public static function close_course_returns(): external_single_structure
+    {
+        return new external_single_structure([
+            'success' => new external_value(PARAM_BOOL, 'True if the course has been closed, else false.')
+        ]);
+    }
+
     /**
      * Creates new course
      *
@@ -93,6 +100,30 @@ class local_formationsapi_api extends external_api
             'course_title' => new external_value(PARAM_RAW_TRIMMED, ''),
             'conference_course_id' => new external_value(PARAM_INT, ''),
             'category_name' => new external_value(PARAM_ALPHANUM, '')
+        ]);
+    }
+
+    public function close_course($conference_course_id)
+    {
+        global $DB;
+
+        self::validate_parameters(self::close_course_parameters(), [
+            'conference_course_id' => $conference_course_id,
+        ]);
+
+        if ($course = $DB->get_record('course', ['shortname' => $conference_course_id])) {
+            $course->visible = 0;
+
+            return ['success' => $DB->update_record('course', $course)];
+        }
+
+        return ['success' => false];
+    }
+
+    public static function close_course_parameters(): external_function_parameters
+    {
+        return new external_function_parameters([
+            'conference_course_id' => new external_value(PARAM_INT, 'Course ID on the Conference platform'),
         ]);
     }
 
