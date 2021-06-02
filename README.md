@@ -20,7 +20,7 @@ This method allows to close a course based on the conference_course_id passed as
 
 Example call :
 
-`curl '[MOODLE_URL]/webservice/rest/server.php?wstoken=[YOUR_TOKEN]&?wsfunction=local_formationsapi_close_course&conference_course_id=1&moodlewsrestformat=json'`
+`curl '[MOODLE_URL]/webservice/rest/server.php?wstoken=[YOUR_TOKEN]&wsfunction=local_formationsapi_close_course&conference_course_id=1&moodlewsrestformat=json'`
 
 returns
 
