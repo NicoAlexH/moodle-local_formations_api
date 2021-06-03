@@ -25,6 +25,15 @@ if ($hassiteconfig) {
                 PARAM_URL
             )
         );
+        $settingspage->add(
+            new admin_setting_configtext(
+                'local_formationsapi/admin_emails',
+                get_string('email_setting_description', 'local_formationsapi'),
+                '',
+                '',
+                PARAM_RAW
+            )
+        );
     }
 
     $ADMIN->add('localplugins', $settingspage);

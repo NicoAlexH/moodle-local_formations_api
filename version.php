@@ -1,7 +1,7 @@
 <?php
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = '2020050712';
+$plugin->version = '2020050713';
 $plugin->requires = '2020061500';
 $plugin->component = 'local_formationsapi';
 $plugin->maturity = MATURITY_BETA;

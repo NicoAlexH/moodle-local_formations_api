@@ -86,11 +86,11 @@ class formationsapi_testcase extends advanced_testcase
         self::assertTrue(is_enrolled(context_course::instance($course->id), $user->id));
     }
 
+
     protected function setUp(): void
     {
         require_once(__DIR__ . '/../classes/api/local_formationsapi_api.php');
         require_once(__DIR__ . '/../classes/observer.php');
         $this->api_class = new local_formationsapi_api();
-
     }
 }
