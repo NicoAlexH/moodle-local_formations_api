@@ -19,6 +19,7 @@ class local_formationsapi_observer
             '*',
             MUST_EXIST
         );
+        $conference_course_id = $course_object->shortname;
         $user = $DB->get_record('user',
             ['id' => $user_id = $event_data['userid']],
             '*',
@@ -32,7 +33,7 @@ class local_formationsapi_observer
             }
             $data = [
                 'participantEmail' => $user->email,
-                'courseId' => $course_id,
+                'courseId' => $conference_course_id,
                 'completion' => $course_completion_percentage
             ];
 
