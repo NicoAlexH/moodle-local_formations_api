@@ -10,9 +10,15 @@ class local_formationsapi_observer
     public static function update_user_profile(core\event\base $event)
     {
         global $DB;
+
         $event_data = $event->get_data();
         $course_id = $event_data['courseid'];
-        $course_object = $DB->get_record('course', ['id' => $course_id]);
+        $course_object = $DB->get_record(
+            'course',
+            ['id' => $course_id],
+            '*',
+            MUST_EXIST
+        );
         $user = $DB->get_record('user',
             ['id' => $user_id = $event_data['userid']],
             '*',
@@ -25,12 +31,12 @@ class local_formationsapi_observer
                 throw new invalid_parameter_exception('API endpoint for updating users is not set.');
             }
             $data = [
-                'user_email' => $user->email,
-                'course_id' => $course_id,
-                'status_percent' => $course_completion_percentage
+                'participantEmail' => $user->email,
+                'courseId' => $course_id,
+                'completion' => $course_completion_percentage
             ];
 
-            return self::call_api('POST', $url, $data);
+            return self::call_api('PUT', $url, $data);
         }
 
         return null;
@@ -46,14 +52,13 @@ class local_formationsapi_observer
     private static function call_api($method, $url, $data = [])
     {
         $curl = curl_init();
+        if ($data) {
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+        }
 
         switch ($method) {
             case "POST":
                 curl_setopt($curl, CURLOPT_POST, 1);
-
-                if ($data) {
-                    curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
-                }
                 break;
             case "PUT":
                 curl_setopt($curl, CURLOPT_PUT, 1);
@@ -62,9 +67,7 @@ class local_formationsapi_observer
                 throw new moodle_exception('invalid call');
         }
 
-        // Optional Authentication:
-        /*curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-        curl_setopt($curl, CURLOPT_USERPWD, "username:password");*/
+        curl_setopt($curl, CURLOPT_HTTPHEADER, 'Content-type: application/json');
         curl_setopt($curl, CURLOPT_TIMEOUT_MS, 10000);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
         curl_setopt($curl, CURLOPT_URL, $url);
@@ -72,23 +75,36 @@ class local_formationsapi_observer
 
         $output = curl_exec($curl);
         $curl_errno = curl_errno($curl); // 0 if fine
-
+        $http_error_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
 
-        if ($output === false) {
-            if ($curl_errno) {
-                throw new moodle_exception('CURL REQUEST ERROR ' . $curl_errno . ' while calling ' . $url);
-            }
+        if ($http_error_code !== 200) {
+            self::send_mail($data, $http_error_code, $curl_errno);
 
             return false;
         }
 
-        try {
-            $return = json_decode($output);
-        } catch (Exception $e) {
-            throw new moodle_exception('api_fail : ' . $e->getMessage() . $e->getCode());
-        }
+        return true;
+    }
 
-        return $return;
+    /**
+     * @param array $data
+     * @param $http_error_code
+     * @param int $curl_errno
+     * @throws \dml_exception
+     */
+    private static function send_mail(array $data, $http_error_code, int $curl_errno): void
+    {
+        $mails = explode(',', trim(get_config('local_formationsapi', 'admin_emails')));
+        $subject = 'Error while updating user';
+        $message = "There was an issue while updating the user " . $data['user_email'] . ", and her/his progress ("
+            . $data['status_percent'] . " %) for the course " . $data['course_id']
+            . " has not been taken into account. \n\n"
+            . "HTTP Error code : " . $http_error_code
+            . " \nCurl error (might be empty): " . $curl_errno;
+        $headers = "From: " . get_admin()->email . "\r\n";
+        foreach ($mails as $mail) {
+            mail($mail, $subject, $message, $headers);
+        }
     }
 }

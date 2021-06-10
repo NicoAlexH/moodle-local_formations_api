@@ -7,31 +7,38 @@ $services = [
         'restrictedusers' => 1,                                             // if enabled, the Moodle administrator must link some user to this service
         // into the administration
         'enabled' => 1,                                                       // if enabled, the service can be reachable on a default installation
-        'shortname' =>  'formationsapiservice',       // optional – but needed if restrictedusers is set so as to allow logins.
+        'shortname' => 'formationsapiservice',       // optional – but needed if restrictedusers is set so as to allow logins.
         'downloadfiles' => 0,    // allow file downloads.
-        'uploadfiles'  => 0      // allow file uploads.
+        'uploadfiles' => 0      // allow file uploads.
     ]
 ];
 
 $functions = [
-    'local_formationsapi_create_course' => [         //web service function name
-        'classname'   => 'local_formationsapi_api',  //class containing the external function OR namespaced class in classes/external/XXXX.php
-        'methodname'  => 'create_course',          //external function name
-        'classpath'   => 'local/formationsapi/classes/api/local_formationsapi_api.php',  //file containing the class/external function - not required if using namespaced auto-loading classes.
-        // defaults to the service's externalib.php
-        'description' => 'Creates new course.',    //human readable description of the web service function
-        'type'        => 'write',                  //database rights of the web service function (read, write)
-        'ajax' => true,        // is the service available to 'internal' ajax calls.
-        'capabilities' => 'moodle/course:create', // comma separated list of capabilities used by the function.
+    'local_formationsapi_create_course' => [
+        'classname' => 'local_formationsapi_api',
+        'methodname' => 'create_course',
+        'classpath' => 'local/formationsapi/classes/api/local_formationsapi_api.php',
+        'description' => 'Creates new course.',
+        'type' => 'write',
+        'ajax' => true,
+        'capabilities' => 'moodle/course:create',
     ],
-    'local_formationsapi_enrol_user' => [         //web service function name
-        'classname'   => 'local_formationsapi_api',  //class containing the external function OR namespaced class in classes/external/XXXX.php
-        'methodname'  => 'enrol_user',          //external function name
-        'classpath'   => 'local/formationsapi/classes/api/local_formationsapi_api.php',  //file containing the class/external function - not required if using namespaced auto-loading classes.
-        // defaults to the service's externalib.php
-        'description' => 'Add user to course.',    //human readable description of the web service function
-        'type'        => 'write',                  //database rights of the web service function (read, write)
-        'ajax' => true,        // is the service available to 'internal' ajax calls.
-        'capabilities' => 'enrol/manual:enrol', // comma separated list of capabilities used by the function.
+    'local_formationsapi_close_course' => [
+        'classname' => 'local_formationsapi_api',
+        'methodname' => 'close_course',
+        'classpath' => 'local/formationsapi/classes/api/local_formationsapi_api.php',
+        'description' => 'Closes a course.',
+        'type' => 'write',
+        'ajax' => true,
+        'capabilities' => 'moodle/course:changevisibility',
+    ],
+    'local_formationsapi_enrol_user' => [
+        'classname' => 'local_formationsapi_api',
+        'methodname' => 'enrol_user',
+        'classpath' => 'local/formationsapi/classes/api/local_formationsapi_api.php',
+        'description' => 'Add user to course.',
+        'type' => 'write',
+        'ajax' => true,
+        'capabilities' => 'enrol/manual:enrol',
     ],
 ];

@@ -11,22 +11,53 @@ class formationsapi_testcase extends advanced_testcase
 {
     private $api_class;
 
-    public function test_basic_course_creation()
+    public function test_first_course_creation()
     {
         global $DB;
 
         $this->resetAfterTest();
 
         $course_name = 'Test course';
+        $conference_course_id = 2;
         $category_name = 'TestCategory';
 
         $category = self::getDataGenerator()->create_category(['idnumber' => $category_name]);
-        $result = (object)$this->api_class->create_course($course_name, $category_name);
+        $result = (object)$this->api_class->create_course($course_name, $conference_course_id, $category_name);
         $course = $DB->get_record('course', ['id' => $result->course_id]);
 
         self::assertEquals("1", $course->enablecompletion);
+        self::assertEquals($conference_course_id, $course->shortname);
         self::assertEquals($category->id, $course->category);
+        self::assertEquals(1, $course->visible);
         self::assertEquals($course_name, $course->fullname);
+    }
+
+    public function test_course_already_exists()
+    {
+        $this->resetAfterTest();
+
+        $course_name = 'test_course';
+        $conference_course_id = 2;
+        $category_name = 'TestCategory';
+        self::getDataGenerator()->create_category(['idnumber' => $category_name]);
+        $first_course = (object)$this->api_class->create_course($course_name, $conference_course_id, $category_name);
+        $second_course = (object)$this->api_class->create_course($course_name, $conference_course_id, $category_name);
+        self::assertEquals($first_course->course_id, $second_course->course_id);
+    }
+
+    public function test_closing_course()
+    {
+        global $DB;
+        $this->resetAfterTest();
+
+        $course_name = 'test_course';
+        $conference_course_id = 2;
+        $category_name = 'TestCategory';
+        self::getDataGenerator()->create_category(['idnumber' => $category_name]);
+        $course = (Object)$this->api_class->create_course($course_name, $conference_course_id, $category_name);
+        $this->api_class->close_course($conference_course_id);
+        $courseObject = $DB->get_record('course', ['id' => $course->course_id]);
+        self::assertEquals(0, $courseObject->visible);
     }
 
     public function test_user_enrolment()
@@ -55,11 +86,11 @@ class formationsapi_testcase extends advanced_testcase
         self::assertTrue(is_enrolled(context_course::instance($course->id), $user->id));
     }
 
+
     protected function setUp(): void
     {
         require_once(__DIR__ . '/../classes/api/local_formationsapi_api.php');
         require_once(__DIR__ . '/../classes/observer.php');
         $this->api_class = new local_formationsapi_api();
-
     }
 }
