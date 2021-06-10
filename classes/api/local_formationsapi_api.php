@@ -54,7 +54,7 @@ class local_formationsapi_api extends external_api
 
         if ($data = $DB->get_record(
             'course',
-            ['shortname' => $conference_course_id],
+            ['idnumber' => $conference_course_id],
             'id'
         )) {
             http_response_code(409);
@@ -65,19 +65,13 @@ class local_formationsapi_api extends external_api
                     . new moodle_url('/course/view.php', ['id' => $data->id]))];
         }
 
-        $cat_id = $DB
-            ->get_record(
-                'course_categories',
-                ['idnumber' => $category_name],
-                '*',
-                MUST_EXIST
-            )
-            ->id;
+        $category_id = self::get_category_id($category_name);
 
         $data = (object)[
             'fullname' => $course_title,
-            'shortname' => $conference_course_id,
-            'category' => (int)$cat_id,
+            'shortname' => $course_title,
+            'idnumber' => $conference_course_id,
+            'category' => $category_id,
             'enablecompletion' => 1
         ];
         $data->id = (int)create_course($data)->id;
@@ -92,7 +86,6 @@ class local_formationsapi_api extends external_api
 
     /**
      * @return external_function_parameters
-     * @throws \invalid_parameter_exception|\dml_exception
      */
     public static function create_course_parameters(): external_function_parameters
     {
@@ -103,7 +96,35 @@ class local_formationsapi_api extends external_api
         ]);
     }
 
-    public function close_course($conference_course_id)
+    /**
+     * @param string $category_name
+     * @return int category id
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * Either returns the id of an existing category or creates a new one
+     */
+    private static function get_category_id($category_name): int
+    {
+        global $DB;
+
+        $category = $DB
+            ->get_record(
+                'course_categories',
+                ['idnumber' => $category_name],
+                '*',
+            );
+
+        return $category->id ?? core_course_category::create(['name' => $category_name, 'idnumber' => $category_name])->id;
+    }
+
+    /**
+     * @param $conference_course_id
+     * @return array|false[]
+     * @throws \dml_exception
+     * @throws \invalid_parameter_exception
+     * Closes a course
+     */
+    public function close_course($conference_course_id): array
     {
         global $DB;
 
@@ -111,7 +132,7 @@ class local_formationsapi_api extends external_api
             'conference_course_id' => $conference_course_id,
         ]);
 
-        if ($course = $DB->get_record('course', ['shortname' => $conference_course_id])) {
+        if ($course = $DB->get_record('course', ['idnumber' => $conference_course_id])) {
             $course->visible = 0;
 
             return ['success' => $DB->update_record('course', $course)];
@@ -215,10 +236,16 @@ class local_formationsapi_api extends external_api
      * @throws \coding_exception
      * @throws \dml_exception
      */
-    private static function enrol_user_in_course($user_id, $course_id, $role_id): bool
+    private static function enrol_user_in_course($user_id, $conference_course_id, $role_id): bool
     {
         global $DB;
 
+        $course_id = $DB->get_record(
+            'course',
+            ['idnumber' => $conference_course_id],
+            '*',
+            MUST_EXIST
+        )->id;
         $context = context_course::instance($course_id);
 
         if (!is_enrolled($context, $user_id)) {

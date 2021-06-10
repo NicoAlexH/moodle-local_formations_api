@@ -11,7 +11,7 @@ class formationsapi_testcase extends advanced_testcase
 {
     private $api_class;
 
-    public function test_first_course_creation()
+    public function test_course_creation_with_existing_category()
     {
         global $DB;
 
@@ -26,10 +26,33 @@ class formationsapi_testcase extends advanced_testcase
         $course = $DB->get_record('course', ['id' => $result->course_id]);
 
         self::assertEquals("1", $course->enablecompletion);
-        self::assertEquals($conference_course_id, $course->shortname);
+        self::assertEquals($conference_course_id, $course->idnumber);
         self::assertEquals($category->id, $course->category);
         self::assertEquals(1, $course->visible);
         self::assertEquals($course_name, $course->fullname);
+        self::assertEquals($course_name, $course->shortname);
+    }
+
+    public function test_course_creation_with_non_existent_category()
+    {
+        global $DB;
+
+        $this->resetAfterTest();
+
+        $course_name = 'Test course';
+        $conference_course_id = 2;
+        $category_name = 'NonExistentCategory';
+
+        $result = (object)$this->api_class->create_course($course_name, $conference_course_id, $category_name);
+        $course = $DB->get_record('course', ['id' => $result->course_id]);
+        $category = $DB->get_record('course_categories', ['idnumber' => $category_name]);
+
+        self::assertEquals("1", $course->enablecompletion);
+        self::assertEquals($conference_course_id, $course->idnumber);
+        self::assertEquals($category->id, $course->category);
+        self::assertEquals(1, $course->visible);
+        self::assertEquals($course_name, $course->fullname);
+        self::assertEquals($course_name, $course->shortname);
     }
 
     public function test_course_already_exists()
@@ -54,7 +77,7 @@ class formationsapi_testcase extends advanced_testcase
         $conference_course_id = 2;
         $category_name = 'TestCategory';
         self::getDataGenerator()->create_category(['idnumber' => $category_name]);
-        $course = (Object)$this->api_class->create_course($course_name, $conference_course_id, $category_name);
+        $course = (object)$this->api_class->create_course($course_name, $conference_course_id, $category_name);
         $this->api_class->close_course($conference_course_id);
         $courseObject = $DB->get_record('course', ['id' => $course->course_id]);
         self::assertEquals(0, $courseObject->visible);
@@ -75,13 +98,13 @@ class formationsapi_testcase extends advanced_testcase
         $category = self::getDataGenerator()->create_category();
 
         //Case 1 : the user already exists
-        $course = self::getDataGenerator()->create_course(['category' => $category->id]);
-        $this->api_class->enrol_user($user->email, $user->firstname, $user->lastname, $course->id, 'student');
+        $course = self::getDataGenerator()->create_course(['category' => $category->id, 'idnumber' => 3]);
+        $this->api_class->enrol_user($user->email, $user->firstname, $user->lastname, 3, 'student');
         self::assertTrue(is_enrolled(context_course::instance($course->id), $user->id));
 
         //Case 2: user is automatically created
-        $course = self::getDataGenerator()->create_course(['category' => $category->id]);
-        $this->api_class->enrol_user('random@example.com', 'Arthur', 'Pendragon', $course->id, 'student');
+        $course = self::getDataGenerator()->create_course(['category' => $category->id, 'idnumber' => 4]);
+        $this->api_class->enrol_user('random@example.com', 'Arthur', 'Pendragon', 4, 'student');
         $user = $DB->get_record('user', ['username' => 'random@example.com']);
         self::assertTrue(is_enrolled(context_course::instance($course->id), $user->id));
     }
