@@ -13,7 +13,12 @@ class local_formationsapi_observer
 
         $event_data = $event->get_data();
         $course_id = $event_data['courseid'];
-        $course_object = $DB->get_record('course', ['id' => $course_id]);
+        $course_object = $DB->get_record(
+            'course',
+            ['id' => $course_id],
+            '*',
+            MUST_EXIST
+        );
         $user = $DB->get_record('user',
             ['id' => $user_id = $event_data['userid']],
             '*',
@@ -26,12 +31,12 @@ class local_formationsapi_observer
                 throw new invalid_parameter_exception('API endpoint for updating users is not set.');
             }
             $data = [
-                'user_email' => $user->email,
-                'course_id' => $course_id,
-                'status_percent' => $course_completion_percentage
+                'participantEmail' => $user->email,
+                'courseId' => $course_id,
+                'completion' => $course_completion_percentage
             ];
 
-            return self::call_api('POST', $url, $data);
+            return self::call_api('PUT', $url, $data);
         }
 
         return null;
@@ -47,14 +52,13 @@ class local_formationsapi_observer
     private static function call_api($method, $url, $data = [])
     {
         $curl = curl_init();
+        if ($data) {
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+        }
 
         switch ($method) {
             case "POST":
                 curl_setopt($curl, CURLOPT_POST, 1);
-
-                if ($data) {
-                    curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
-                }
                 break;
             case "PUT":
                 curl_setopt($curl, CURLOPT_PUT, 1);
@@ -80,13 +84,7 @@ class local_formationsapi_observer
             return false;
         }
 
-        try {
-            $return = json_decode($output);
-        } catch (Exception $e) {
-            throw new moodle_exception('api_fail : ' . $e->getMessage() . $e->getCode());
-        }
-
-        return $return;
+        return true;
     }
 
     /**
