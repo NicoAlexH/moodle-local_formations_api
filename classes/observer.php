@@ -21,7 +21,7 @@ class local_formationsapi_observer
         );
         $conference_course_id = $course_object->idnumber;
         $user = $DB->get_record('user',
-            ['id' => $user_id = $event_data['userid']],
+            ['id' => $event_data['relateduserid']],
             '*',
             MUST_EXIST
         );
@@ -68,7 +68,7 @@ class local_formationsapi_observer
                 throw new moodle_exception('invalid call');
         }
 
-        curl_setopt($curl, CURLOPT_HTTPHEADER, 'Content-type: application/json');
+        curl_setopt($curl, CURLOPT_HTTPHEADER, ['Content-type: application/json']);
         curl_setopt($curl, CURLOPT_TIMEOUT_MS, 10000);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
         curl_setopt($curl, CURLOPT_URL, $url);
