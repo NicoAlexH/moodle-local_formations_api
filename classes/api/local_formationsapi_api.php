@@ -154,7 +154,7 @@ class local_formationsapi_api extends external_api
      * @throws \invalid_parameter_exception
      * @throws \coding_exception
      */
-    public function enrol_user($user_email, $user_firstname, $user_lastname, $course_id, $role_shortname): array
+    public function enrol_user($user_email, $user_firstname, $user_lastname, $conference_course_id, $role_shortname): array
     {
         global $DB;
 
@@ -162,7 +162,7 @@ class local_formationsapi_api extends external_api
             'user_email' => $user_email,
             'user_firstname' => $user_firstname,
             'user_lastname' => $user_lastname,
-            'course_id' => $course_id,
+            'course_id' => $conference_course_id,
             'role_shortname' => $role_shortname
         ]);
 
@@ -182,7 +182,7 @@ class local_formationsapi_api extends external_api
 
         $role = $DB->get_record('role', ['shortname' => $role_shortname], 'id', MUST_EXIST);
 
-        return ['success' => self::enrol_user_in_course($user->id, $course_id, $role->id)];
+        return ['success' => self::enrol_user_in_course($user->id, $conference_course_id, $role->id)];
     }
 
     /**
