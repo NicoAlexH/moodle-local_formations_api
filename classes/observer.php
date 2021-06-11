@@ -25,7 +25,7 @@ class local_formationsapi_observer
             '*',
             MUST_EXIST
         );
-        $course_completion_percentage = progress::get_course_progress_percentage($course_object, $user->id);
+        $course_completion_percentage = (int) progress::get_course_progress_percentage($course_object, $user->id);
         if (!is_null($course_completion_percentage)) {
             $url = get_config('local_formationsapi', 'update_user_call_url');
             if (!$url) {
@@ -98,8 +98,8 @@ class local_formationsapi_observer
     {
         $mails = explode(',', trim(get_config('local_formationsapi', 'admin_emails')));
         $subject = 'Error while updating user';
-        $message = "There was an issue while updating the user " . $data['user_email'] . ", and her/his progress ("
-            . $data['status_percent'] . " %) for the course " . $data['course_id']
+        $message = "There was an issue while updating the user " . $data['participantEmail'] . ", and her/his progress ("
+            . $data['completion'] . " %) for the course " . $data['courseId']
             . " has not been taken into account. \n\n"
             . "HTTP Error code : " . $http_error_code
             . " \nCurl error (might be empty): " . $curl_errno;
