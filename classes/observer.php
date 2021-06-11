@@ -33,7 +33,7 @@ class local_formationsapi_observer
             }
             $data = [
                 'participantEmail' => $user->email,
-                'courseId' => $conference_course_id,
+                'courseId' => (int) $conference_course_id,
                 'completion' => $course_completion_percentage
             ];
 
