@@ -34,6 +34,15 @@ if ($hassiteconfig) {
                 PARAM_RAW
             )
         );
+        $settingspage->add(
+            new admin_setting_configtext(
+                'local_formationsapi/apikey',
+                get_string('apikey_description', 'local_formationsapi'),
+                '',
+                '',
+                PARAM_RAW
+            )
+        );
     }
 
     $ADMIN->add('localplugins', $settingspage);

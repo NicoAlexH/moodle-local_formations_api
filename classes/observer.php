@@ -25,7 +25,7 @@ class local_formationsapi_observer
             '*',
             MUST_EXIST
         );
-        $course_completion_percentage = (int) progress::get_course_progress_percentage($course_object, $user->id);
+        $course_completion_percentage = (int)progress::get_course_progress_percentage($course_object, $user->id);
         if (!is_null($course_completion_percentage)) {
             $url = get_config('local_formationsapi', 'update_user_call_url');
             if (!$url) {
@@ -33,7 +33,7 @@ class local_formationsapi_observer
             }
             $data = [
                 'participantEmail' => $user->email,
-                'courseId' => (int) $conference_course_id,
+                'courseId' => (int)$conference_course_id,
                 'completion' => $course_completion_percentage
             ];
 
@@ -52,32 +52,25 @@ class local_formationsapi_observer
      */
     private static function call_api($method, $url, $data = [])
     {
-        $curl = curl_init();
-        if ($data) {
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
-        }
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 
-        switch ($method) {
-            case "POST":
-                curl_setopt($curl, CURLOPT_POST, 1);
-                break;
-            case "PUT":
-                curl_setopt($curl, CURLOPT_PUT, 1);
-                break;
-            default:
-                throw new moodle_exception('invalid call');
-        }
+        curl_setopt(
+            $ch,
+            CURLOPT_HTTPHEADER,
+            [
+                'Content-Type: application/json',
+                'Apikey: ' . get_config('local_formationsapi', 'apikey')
+            ]
+        );
 
-        curl_setopt($curl, CURLOPT_HTTPHEADER, ['Content-type: application/json']);
-        curl_setopt($curl, CURLOPT_TIMEOUT_MS, 10000);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
-        curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-
-        $output = curl_exec($curl);
-        $curl_errno = curl_errno($curl); // 0 if fine
-        $http_error_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        curl_close($curl);
+        curl_exec($ch);
+        $curl_errno = curl_errno($ch); // 0 if fine
+        $http_error_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
 
         if ($http_error_code !== 200) {
             self::send_mail($data, $http_error_code, $curl_errno);
