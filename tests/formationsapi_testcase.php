@@ -17,16 +17,16 @@ class formationsapi_testcase extends advanced_testcase
 
         $this->resetAfterTest();
 
-        $course_name = 'Test course';
-        $conference_course_id = 2;
-        $category_name = 'TestCategory';
+        $course_name = 'Test course éäèö';
+        $app_course_id = 2;
+        $category_name = 'TestCatégorie';
 
         $category = self::getDataGenerator()->create_category(['idnumber' => $category_name]);
-        $result = (object)$this->api_class->create_course($course_name, $conference_course_id, $category_name);
+        $result = (object)$this->api_class->create_course($course_name, $app_course_id, $category_name);
         $course = $DB->get_record('course', ['id' => $result->course_id]);
 
         self::assertEquals("1", $course->enablecompletion);
-        self::assertEquals($conference_course_id, $course->idnumber);
+        self::assertEquals($app_course_id, $course->idnumber);
         self::assertEquals($category->id, $course->category);
         self::assertEquals(1, $course->visible);
         self::assertEquals($course_name, $course->fullname);
@@ -40,15 +40,15 @@ class formationsapi_testcase extends advanced_testcase
         $this->resetAfterTest();
 
         $course_name = 'Test course';
-        $conference_course_id = 2;
+        $app_course_id = 2;
         $category_name = 'NonExistentCategory';
 
-        $result = (object)$this->api_class->create_course($course_name, $conference_course_id, $category_name);
+        $result = (object)$this->api_class->create_course($course_name, $app_course_id, $category_name);
         $course = $DB->get_record('course', ['id' => $result->course_id]);
         $category = $DB->get_record('course_categories', ['idnumber' => $category_name]);
 
         self::assertEquals("1", $course->enablecompletion);
-        self::assertEquals($conference_course_id, $course->idnumber);
+        self::assertEquals($app_course_id, $course->idnumber);
         self::assertEquals($category->id, $course->category);
         self::assertEquals(1, $course->visible);
         self::assertEquals($course_name, $course->fullname);
@@ -60,11 +60,11 @@ class formationsapi_testcase extends advanced_testcase
         $this->resetAfterTest();
 
         $course_name = 'test_course';
-        $conference_course_id = 2;
+        $app_course_id = 2;
         $category_name = 'TestCategory';
         self::getDataGenerator()->create_category(['idnumber' => $category_name]);
-        $first_course = (object)$this->api_class->create_course($course_name, $conference_course_id, $category_name);
-        $second_course = (object)$this->api_class->create_course($course_name, $conference_course_id, $category_name);
+        $first_course = (object)$this->api_class->create_course($course_name, $app_course_id, $category_name);
+        $second_course = (object)$this->api_class->create_course($course_name, $app_course_id, $category_name);
         self::assertEquals($first_course->course_id, $second_course->course_id);
     }
 
@@ -74,11 +74,11 @@ class formationsapi_testcase extends advanced_testcase
         $this->resetAfterTest();
 
         $course_name = 'test_course';
-        $conference_course_id = 2;
+        $app_course_id = 2;
         $category_name = 'TestCategory';
         self::getDataGenerator()->create_category(['idnumber' => $category_name]);
-        $course = (object)$this->api_class->create_course($course_name, $conference_course_id, $category_name);
-        $this->api_class->close_course($conference_course_id);
+        $course = (object)$this->api_class->create_course($course_name, $app_course_id, $category_name);
+        $this->api_class->close_course($app_course_id);
         $courseObject = $DB->get_record('course', ['id' => $course->course_id]);
         self::assertEquals(0, $courseObject->visible);
     }

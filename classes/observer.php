@@ -19,7 +19,7 @@ class local_formationsapi_observer
             '*',
             MUST_EXIST
         );
-        $conference_course_id = $course_object->idnumber;
+        $app_course_id = $course_object->idnumber;
         $user = $DB->get_record('user',
             ['id' => $event_data['relateduserid']],
             '*',
@@ -33,7 +33,7 @@ class local_formationsapi_observer
             }
             $data = [
                 'participantEmail' => $user->email,
-                'courseId' => (int)$conference_course_id,
+                'courseId' => (int)$app_course_id,
                 'completion' => $course_completion_percentage
             ];
 
@@ -50,7 +50,7 @@ class local_formationsapi_observer
      * @return bool|string
      * @throws \moodle_exception
      */
-    private static function call_api($method, $url, $data = [])
+    public static function call_api($method, $url, $data = [])
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -68,37 +68,40 @@ class local_formationsapi_observer
         );
 
         curl_exec($ch);
-        $curl_errno = curl_errno($ch); // 0 if fine
         $http_error_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
         if ($http_error_code !== 200) {
-            self::send_mail($data, $http_error_code, $curl_errno);
-
+            self::process_error($data);
             return false;
         }
 
+        self::clean_failed_api_calls($data);
         return true;
     }
 
-    /**
-     * @param array $data
-     * @param $http_error_code
-     * @param int $curl_errno
-     * @throws \dml_exception
-     */
-    private static function send_mail(array $data, $http_error_code, int $curl_errno): void
+    private static function clean_failed_api_calls(array $data){
+        global $DB;
+        $DB->delete_records(
+            'local_formationsapi',
+            [
+                'user_email' => $data['participantEmail'],
+                'app_course_id' => $data['courseId']
+            ]
+        );
+    }
+
+    private static function process_error(array $data)
     {
-        $mails = explode(',', trim(get_config('local_formationsapi', 'admin_emails')));
-        $subject = 'Error while updating user';
-        $message = "There was an issue while updating the user " . $data['participantEmail'] . ", and her/his progress ("
-            . $data['completion'] . " %) for the course " . $data['courseId']
-            . " has not been taken into account. \n\n"
-            . "HTTP Error code : " . $http_error_code
-            . " \nCurl error (might be empty): " . $curl_errno;
-        $headers = "From: " . get_admin()->email . "\r\n";
-        foreach ($mails as $mail) {
-            mail($mail, $subject, $message, $headers);
-        }
+        global $DB;
+        self::clean_failed_api_calls($data);
+        $DB->insert_record(
+            'local_formationsapi',
+            [
+                'user_email' => $data['participantEmail'],
+                'app_course_id' => $data['courseId'],
+                'completion' => $data['completion']
+            ]
+        );
     }
 }

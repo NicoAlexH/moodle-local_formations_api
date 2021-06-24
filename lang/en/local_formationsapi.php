@@ -6,3 +6,4 @@ $string['category_setting_description'] = 'The identifier of the category which 
 $string['email_setting_description'] = 'This field shall contain emails, separated by comma, that will be notified in case of an error during API calls.';
 $string['update_user_call_url_description'] = 'The URL which will be called by the REST service to update the users course completion.';
 $string['apikey_description'] = 'API key for updating users';
+$string['retry_rest_calls'] = 'Retry failed API calls';

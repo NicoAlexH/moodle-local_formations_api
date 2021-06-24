@@ -42,19 +42,19 @@ class local_formationsapi_api extends external_api
      * @throws \moodle_exception
      * @returns array[course_id, course_url]
      */
-    public function create_course($course_title, $conference_course_id, $category_name): ?array
+    public function create_course($course_title, $app_course_id, $category_name): ?array
     {
         global $DB;
 
         self::validate_parameters(self::create_course_parameters(), [
             'course_title' => $course_title,
-            'conference_course_id' => $conference_course_id,
+            'app_course_id' => $app_course_id,
             'category_name' => $category_name
         ]);
 
         if ($data = $DB->get_record(
             'course',
-            ['idnumber' => $conference_course_id],
+            ['idnumber' => $app_course_id],
             'id'
         )) {
             http_response_code(409);
@@ -70,7 +70,7 @@ class local_formationsapi_api extends external_api
         $data = (object)[
             'fullname' => $course_title,
             'shortname' => $course_title,
-            'idnumber' => $conference_course_id,
+            'idnumber' => $app_course_id,
             'category' => $category_id,
             'enablecompletion' => 1
         ];
@@ -91,8 +91,8 @@ class local_formationsapi_api extends external_api
     {
         return new external_function_parameters([
             'course_title' => new external_value(PARAM_RAW_TRIMMED, ''),
-            'conference_course_id' => new external_value(PARAM_INT, ''),
-            'category_name' => new external_value(PARAM_ALPHANUM, '')
+            'app_course_id' => new external_value(PARAM_INT, ''),
+            'category_name' => new external_value(PARAM_RAW_TRIMMED, '')
         ]);
     }
 
@@ -118,21 +118,21 @@ class local_formationsapi_api extends external_api
     }
 
     /**
-     * @param $conference_course_id
+     * @param $app_course_id
      * @return array|false[]
      * @throws \dml_exception
      * @throws \invalid_parameter_exception
      * Closes a course
      */
-    public function close_course($conference_course_id): array
+    public function close_course($app_course_id): array
     {
         global $DB;
 
         self::validate_parameters(self::close_course_parameters(), [
-            'conference_course_id' => $conference_course_id,
+            'app_course_id' => $app_course_id,
         ]);
 
-        if ($course = $DB->get_record('course', ['idnumber' => $conference_course_id])) {
+        if ($course = $DB->get_record('course', ['idnumber' => $app_course_id])) {
             $course->visible = 0;
 
             return ['success' => $DB->update_record('course', $course)];
@@ -144,7 +144,7 @@ class local_formationsapi_api extends external_api
     public static function close_course_parameters(): external_function_parameters
     {
         return new external_function_parameters([
-            'conference_course_id' => new external_value(PARAM_INT, 'Course ID on the Conference platform'),
+            'app_course_id' => new external_value(PARAM_INT, 'Course ID on the Conference platform'),
         ]);
     }
 
@@ -154,7 +154,7 @@ class local_formationsapi_api extends external_api
      * @throws \invalid_parameter_exception
      * @throws \coding_exception
      */
-    public function enrol_user($user_email, $user_firstname, $user_lastname, $conference_course_id, $role_shortname): array
+    public function enrol_user($user_email, $user_firstname, $user_lastname, $app_course_id, $role_shortname): array
     {
         global $DB;
 
@@ -162,7 +162,7 @@ class local_formationsapi_api extends external_api
             'user_email' => $user_email,
             'user_firstname' => $user_firstname,
             'user_lastname' => $user_lastname,
-            'course_id' => $conference_course_id,
+            'course_id' => $app_course_id,
             'role_shortname' => $role_shortname
         ]);
 
@@ -182,7 +182,7 @@ class local_formationsapi_api extends external_api
 
         $role = $DB->get_record('role', ['shortname' => $role_shortname], 'id', MUST_EXIST);
 
-        return ['success' => self::enrol_user_in_course($user->id, $conference_course_id, $role->id)];
+        return ['success' => self::enrol_user_in_course($user->id, $app_course_id, $role->id)];
     }
 
     /**
@@ -236,13 +236,13 @@ class local_formationsapi_api extends external_api
      * @throws \coding_exception
      * @throws \dml_exception
      */
-    private static function enrol_user_in_course($user_id, $conference_course_id, $role_id): bool
+    private static function enrol_user_in_course($user_id, $app_course_id, $role_id): bool
     {
         global $DB;
 
         $course_id = $DB->get_record(
             'course',
-            ['idnumber' => $conference_course_id],
+            ['idnumber' => $app_course_id],
             '*',
             MUST_EXIST
         )->id;
