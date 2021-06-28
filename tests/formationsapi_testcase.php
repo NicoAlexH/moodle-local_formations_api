@@ -6,10 +6,10 @@ if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.'); //  It must be included from a Moodle page
 }
 
-// vendor/bin/phpunit local/formationsapi/tests/formationsapi_testcase.php
 class formationsapi_testcase extends advanced_testcase
 {
     private $api_class;
+    private $observer;
 
     public function test_course_creation_with_existing_category()
     {
@@ -109,11 +109,30 @@ class formationsapi_testcase extends advanced_testcase
         self::assertTrue(is_enrolled(context_course::instance($course->id), $user->id));
     }
 
+    public function test_clean_failed_api_calls()
+    {
+        $this->resetAfterTest();
+        global $DB;
+        $DB->insert_record('local_formationsapi', ['user_email' => 'arthur.pendragon@mail.cz', 'app_course_id' => 1, 'completion' => 0]);
+        $this->observer::clean_failed_api_calls(['participantEmail' => 'arthur.pendragon@mail.cz', 'courseId' => 1]);
+        self::assertEmpty($DB->get_records('local_formationsapi'));
+    }
+
+    public function test_process_error_replaces_old_value()
+    {
+        $this->resetAfterTest();
+        global $DB;
+        $DB->insert_record('local_formationsapi', ['user_email' => 'arthur.pendragon@mail.cz', 'app_course_id' => 1, 'completion' => 0]);
+        $this->observer::process_error(['participantEmail' => 'arthur.pendragon@mail.cz', 'courseId' => 1, 'completion' => 50]);
+        self::assertEquals("50", $DB->get_record('local_formationsapi', ['user_email' => 'arthur.pendragon@mail.cz', 'app_course_id' => 1])->completion);
+    }
+
 
     protected function setUp(): void
     {
         require_once(__DIR__ . '/../classes/api/local_formationsapi_api.php');
         require_once(__DIR__ . '/../classes/observer.php');
         $this->api_class = new local_formationsapi_api();
+        $this->observer = new local_formationsapi_observer();
     }
 }
