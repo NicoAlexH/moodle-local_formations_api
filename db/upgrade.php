@@ -12,9 +12,9 @@ function xmldb_local_formationsapi_upgrade($oldversion) {
 
         // Adding fields to table local_formationsapi.
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('user_email', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('app_course_id', XMLDB_TYPE_INTEGER, '5', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('completion', XMLDB_TYPE_INTEGER, '3', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('user_email', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL, false, null);
+        $table->add_field('app_course_id', XMLDB_TYPE_INTEGER, '5', null, XMLDB_NOTNULL, false, null);
+        $table->add_field('completion', XMLDB_TYPE_INTEGER, '3', null, XMLDB_NOTNULL, false, null);
 
         // Adding keys to table local_formationsapi.
         $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
