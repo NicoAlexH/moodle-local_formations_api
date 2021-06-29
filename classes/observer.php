@@ -83,11 +83,13 @@ class local_formationsapi_observer
         );
 
         $exec = curl_exec($ch) !== false;
-        curl_close($ch);
 
-        return $exec && curl_getinfo($ch, CURLINFO_HTTP_CODE)
-            ? curl_getinfo($ch, CURLINFO_HTTP_CODE)
-            : 408;
+
+        if ($exec) {
+            curl_close($ch);
+            return curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        }
+        return 408;
     }
 
     /**
