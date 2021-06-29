@@ -19,23 +19,24 @@ class retry_rest_calls extends \core\task\scheduled_task
     /**
      * Execute the task.
      * @throws \dml_exception
+     * @throws \moodle_exception
      */
     public function execute()
     {
         global $DB;
         $failed_api_calls = $DB->get_records('local_formationsapi');
         $url = get_config('local_formationsapi', 'update_user_call_url');
-        if ($failed_api_calls) {
-            foreach ($failed_api_calls as $call_data) {
-                $data = [
-                    'participantEmail' => $call_data->user_email,
-                    'courseId' => $call_data->app_course_id,
-                    'completion' => $call_data->completion
-                ];
+        foreach ($failed_api_calls as $call_data) {
+            $data = [
+                'participantEmail' => $call_data->user_email,
+                'courseId' => $call_data->app_course_id,
+                'completion' => $call_data->completion
+            ];
 
-                local_formationsapi_observer::call_api('PUT', $url, $data) !== 200
-                || local_formationsapi_observer::clean_failed_api_calls($data);
-            }
+            local_formationsapi_observer::call_api('PUT', $url, $data) !== 200
+            || local_formationsapi_observer::clean_failed_api_calls($data);
+        }
+        if ($failed_api_calls = $DB->get_records('local_formationsapi')) {
             self::send_mail($failed_api_calls);
         }
     }
