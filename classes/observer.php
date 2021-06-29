@@ -27,6 +27,38 @@ class local_formationsapi_observer
     }
 
     /**
+     * Parses the course_completion_updated event in order to get the user course completion info
+     * @param \core\event\base $event
+     * @return array
+     * @throws \dml_exception
+     */
+    public static function parse_event(base $event): array
+    {
+        global $DB;
+        $event_data = $event->get_data();
+        $course_id = $event_data['courseid'];
+        $course_object = $DB->get_record(
+            'course',
+            ['id' => $course_id],
+            '*',
+            MUST_EXIST
+        );
+        $app_course_id = $course_object->idnumber;
+        $user = $DB->get_record('user',
+            ['id' => $event_data['relateduserid']],
+            '*',
+            MUST_EXIST
+        );
+        $course_completion_percentage = (int)progress::get_course_progress_percentage($course_object, $user->id);
+
+        return [
+            'participantEmail' => $user->email,
+            'courseId' => (int)$app_course_id,
+            'completion' => $course_completion_percentage
+        ];
+    }
+
+    /**
      * @param string $method POST | PUT
      * @param string $url
      * @param array $data
@@ -50,10 +82,10 @@ class local_formationsapi_observer
             ]
         );
 
-        curl_exec($ch);
+        $exec = curl_exec($ch);
         curl_close($ch);
 
-        return curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        return $exec && curl_getinfo($ch, CURLINFO_HTTP_CODE) ? curl_getinfo($ch, CURLINFO_HTTP_CODE) : 408;
     }
 
     /**
@@ -96,37 +128,5 @@ class local_formationsapi_observer
         );
 
         return false;
-    }
-
-    /**
-     * Parses the course_completion_updated event in order to get the user course completion info
-     * @param \core\event\base $event
-     * @return array
-     * @throws \dml_exception
-     */
-    public static function parse_event(base $event): array
-    {
-        global $DB;
-        $event_data = $event->get_data();
-        $course_id = $event_data['courseid'];
-        $course_object = $DB->get_record(
-            'course',
-            ['id' => $course_id],
-            '*',
-            MUST_EXIST
-        );
-        $app_course_id = $course_object->idnumber;
-        $user = $DB->get_record('user',
-            ['id' => $event_data['relateduserid']],
-            '*',
-            MUST_EXIST
-        );
-        $course_completion_percentage = (int)progress::get_course_progress_percentage($course_object, $user->id);
-
-        return [
-            'participantEmail' => $user->email,
-            'courseId' => (int)$app_course_id,
-            'completion' => $course_completion_percentage
-        ];
     }
 }
