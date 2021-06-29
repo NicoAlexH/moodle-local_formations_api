@@ -86,8 +86,10 @@ class local_formationsapi_observer
 
 
         if ($exec) {
+            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
-            return curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            return $http_code;
+
         }
         return 408;
     }
