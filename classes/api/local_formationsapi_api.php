@@ -193,7 +193,7 @@ class local_formationsapi_api extends external_api
      * @throws \invalid_parameter_exception
      * @throws \coding_exception
      */
-    public function enrol_user($user_email, $user_firstname, $user_lastname, $app_course_id, $role_shortname): array
+    public static function enrol_user($user_email, $user_firstname, $user_lastname, $app_course_id, $role_shortname): array
     {
         global $DB;
 
