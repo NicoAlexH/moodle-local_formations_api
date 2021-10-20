@@ -36,13 +36,20 @@ class local_formationsapi_api extends external_api
         ]);
     }
 
+    public static function delete_course_returns(): external_single_structure
+    {
+        return new external_single_structure([
+            'success' => new external_value(PARAM_BOOL, 'True if the course has been deleted, else false.')
+        ]);
+    }
+
     /**
      * Creates new course
      *
      * @throws \moodle_exception
      * @returns array[course_id, course_url]
      */
-    public function create_course($course_title, $app_course_id, $category_name): ?array
+    public static function create_course($course_title, $app_course_id, $category_name): ?array
     {
         global $DB;
 
@@ -124,7 +131,7 @@ class local_formationsapi_api extends external_api
      * @throws \invalid_parameter_exception
      * Closes a course
      */
-    public function close_course($app_course_id): array
+    public static function close_course($app_course_id): array
     {
         global $DB;
 
@@ -139,6 +146,38 @@ class local_formationsapi_api extends external_api
         }
 
         return ['success' => false];
+    }
+
+    /**
+     * @param $app_course_id
+     * @return array
+     * @throws \dml_exception
+     * @throws \invalid_parameter_exception
+     * Deletes a course
+     */
+    public static function delete_course($app_course_id, $verbose = false): array
+    {
+        global $DB;
+
+        self::validate_parameters(
+            self::delete_course_parameters(),
+            [
+                'app_course_id' => $app_course_id,
+            ]
+        );
+
+        if ($course = $DB->get_record('course', ['idnumber' => $app_course_id])) {
+            return ['success' => delete_course($course->id, $verbose)];
+        }
+
+        return ['success' => true];
+    }
+
+    public static function delete_course_parameters(): external_function_parameters
+    {
+        return new external_function_parameters([
+            'app_course_id' => new external_value(PARAM_INT, 'Course ID on the Conference platform'),
+        ]);
     }
 
     public static function close_course_parameters(): external_function_parameters

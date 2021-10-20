@@ -68,7 +68,7 @@ class formationsapi_testcase extends advanced_testcase
         self::assertEquals($first_course->course_id, $second_course->course_id);
     }
 
-    public function test_closing_course()
+    public function test_closing_and_deleting_course()
     {
         global $DB;
         $this->resetAfterTest();
@@ -81,7 +81,12 @@ class formationsapi_testcase extends advanced_testcase
         $this->api_class->close_course($app_course_id);
         $courseObject = $DB->get_record('course', ['id' => $course->course_id]);
         self::assertEquals(0, $courseObject->visible);
+        //course_deletion
+        $this->api_class->delete_course($app_course_id);
+        $courseObject = $DB->get_record('course', ['id' => $course->course_id]);
+        self::assertFalse($courseObject);
     }
+
 
     public function test_user_enrolment()
     {

@@ -8,7 +8,7 @@ This method allows to create a new course by specifying a title and the name of 
 
 Example call :
 
-`curl '[MOODLE_URL]/webservice/rest/server.php?wstoken=[YOUR_TOKEN]&wsfunction=local_formationsapi_create_course&course_title=toto&category_name=test&moodlewsrestformat=json'`
+`curl '[MOODLE_URL]/webservice/rest/server.php?wstoken=[YOUR_TOKEN]&wsfunction=local_formationsapi_create_course&app_course_id=1&course_title=toto&category_name=test&moodlewsrestformat=json'`
 
 returns 
 
@@ -21,6 +21,18 @@ This method allows to close a course based on the app_course_id passed as a para
 Example call :
 
 `curl '[MOODLE_URL]/webservice/rest/server.php?wstoken=[YOUR_TOKEN]&wsfunction=local_formationsapi_close_course&app_course_id=1&moodlewsrestformat=json'`
+
+returns
+
+`{"success":true}`
+
+- **local_formationsapi_delete_course (Int app_course_id): course_id**
+
+This method allows to delete a course based on the app_course_id passed as a parameter.
+
+Example call :
+
+`curl '[MOODLE_URL]/webservice/rest/server.php?wstoken=[YOUR_TOKEN]&wsfunction=local_formationsapi_delete_course&app_course_id=1&moodlewsrestformat=json'`
 
 returns
 
