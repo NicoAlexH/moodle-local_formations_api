@@ -106,18 +106,20 @@ class formationsapi_testcase extends advanced_testcase
     /**
      * @throws \dml_exception
      */
-    public function test_user_enrolment(): void
+    public function test_user_enrolment_and_unenrolment(): void
     {
         global $DB, $CFG;
         require_once($CFG->libdir . '/enrollib.php');
 
         $this->resetAfterTest();
 
-        $user = self::getDataGenerator()->create_user([
-            'username' => 'toto@example.com',
-            'email' => 'toto@example.com',
-            'auth' => 'shibboleth',
-        ]);
+        $user = self::getDataGenerator()->create_user(
+            [
+                'username' => 'toto@example.com',
+                'email' => 'toto@example.com',
+                'auth' => 'shibboleth',
+            ]
+        );
         $category = self::getDataGenerator()->create_category();
 
         //Case 1 : the user already exists
@@ -143,7 +145,10 @@ class formationsapi_testcase extends advanced_testcase
     {
         $this->resetAfterTest();
         global $DB;
-        $DB->insert_record('local_formationsapi', ['user_email' => 'arthur.pendragon@mail.cz', 'app_course_id' => 1, 'completion' => 0]);
+        $DB->insert_record(
+            'local_formationsapi',
+            ['user_email' => 'arthur.pendragon@mail.cz', 'app_course_id' => 1, 'completion' => 0]
+        );
         $this->observer::clean_failed_api_calls(['participantEmail' => 'arthur.pendragon@mail.cz', 'courseId' => 1]);
         self::assertEmpty($DB->get_records('local_formationsapi'));
     }
@@ -155,9 +160,20 @@ class formationsapi_testcase extends advanced_testcase
     {
         $this->resetAfterTest();
         global $DB;
-        $DB->insert_record('local_formationsapi', ['user_email' => 'arthur.pendragon@mail.cz', 'app_course_id' => 1, 'completion' => 0]);
-        $this->observer::process_error(['participantEmail' => 'arthur.pendragon@mail.cz', 'courseId' => 1, 'completion' => 50]);
-        self::assertEquals("50", $DB->get_record('local_formationsapi', ['user_email' => 'arthur.pendragon@mail.cz', 'app_course_id' => 1])->completion);
+        $DB->insert_record(
+            'local_formationsapi',
+            ['user_email' => 'arthur.pendragon@mail.cz', 'app_course_id' => 1, 'completion' => 0]
+        );
+        $this->observer::process_error(
+            ['participantEmail' => 'arthur.pendragon@mail.cz', 'courseId' => 1, 'completion' => 50]
+        );
+        self::assertEquals(
+            "50",
+            $DB->get_record(
+                'local_formationsapi',
+                ['user_email' => 'arthur.pendragon@mail.cz', 'app_course_id' => 1]
+            )->completion
+        );
     }
 
 

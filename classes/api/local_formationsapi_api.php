@@ -13,10 +13,12 @@ class local_formationsapi_api extends external_api
      */
     public static function create_course_returns(): external_single_structure
     {
-        return new external_single_structure([
-            'course_id' => new external_value(PARAM_INT, 'ID of the created course'),
-            'course_url' => new external_value(PARAM_URL, 'URL of the created course')
-        ]);
+        return new external_single_structure(
+            [
+                'course_id' => new external_value(PARAM_INT, 'ID of the created course'),
+                'course_url' => new external_value(PARAM_URL, 'URL of the created course')
+            ]
+        );
     }
 
     /**
@@ -24,23 +26,32 @@ class local_formationsapi_api extends external_api
      */
     public static function enrol_user_returns()
     {
-        return new external_single_structure([
-            'success' => new external_value(PARAM_BOOL, 'True if the user has been enrolled in the course, else false.')
-        ]);
+        return new external_single_structure(
+            [
+                'success' => new external_value(
+                    PARAM_BOOL,
+                    'True if the user has been enrolled in the course, else false.'
+                )
+            ]
+        );
     }
 
     public static function close_course_returns(): external_single_structure
     {
-        return new external_single_structure([
-            'success' => new external_value(PARAM_BOOL, 'True if the course has been closed, else false.')
-        ]);
+        return new external_single_structure(
+            [
+                'success' => new external_value(PARAM_BOOL, 'True if the course has been closed, else false.')
+            ]
+        );
     }
 
     public static function delete_course_returns(): external_single_structure
     {
-        return new external_single_structure([
-            'success' => new external_value(PARAM_BOOL, 'True if the course has been deleted, else false.')
-        ]);
+        return new external_single_structure(
+            [
+                'success' => new external_value(PARAM_BOOL, 'True if the course has been deleted, else false.')
+            ]
+        );
     }
 
     /**
@@ -53,11 +64,14 @@ class local_formationsapi_api extends external_api
     {
         global $DB;
 
-        self::validate_parameters(self::create_course_parameters(), [
-            'course_title' => $course_title,
-            'app_course_id' => $app_course_id,
-            'category_name' => $category_name
-        ]);
+        self::validate_parameters(
+            self::create_course_parameters(),
+            [
+                'course_title' => $course_title,
+                'app_course_id' => $app_course_id,
+                'category_name' => $category_name
+            ]
+        );
 
         if ($data = $DB->get_record(
             'course',
@@ -68,8 +82,11 @@ class local_formationsapi_api extends external_api
 
             return [
                 'course_id' => $data->id,
-                'course_url' => (string)new moodle_url('/auth/shibboleth/index.php?target='
-                    . new moodle_url('/course/view.php', ['id' => $data->id]))];
+                'course_url' => (string)new moodle_url(
+                    '/auth/shibboleth/index.php?target='
+                    . new moodle_url('/course/view.php', ['id' => $data->id])
+                )
+            ];
         }
 
         $category_id = self::get_category_id($category_name);
@@ -86,8 +103,10 @@ class local_formationsapi_api extends external_api
 
         return [
             'course_id' => $data->id,
-            'course_url' => (string)new moodle_url('/auth/shibboleth/index.php?target='
-                . new moodle_url('/course/view.php', ['id' => $data->id]))
+            'course_url' => (string)new moodle_url(
+                '/auth/shibboleth/index.php?target='
+                . new moodle_url('/course/view.php', ['id' => $data->id])
+            )
         ];
     }
 
@@ -96,11 +115,13 @@ class local_formationsapi_api extends external_api
      */
     public static function create_course_parameters(): external_function_parameters
     {
-        return new external_function_parameters([
-            'course_title' => new external_value(PARAM_RAW_TRIMMED, ''),
-            'app_course_id' => new external_value(PARAM_INT, ''),
-            'category_name' => new external_value(PARAM_RAW_TRIMMED, '')
-        ]);
+        return new external_function_parameters(
+            [
+                'course_title' => new external_value(PARAM_RAW_TRIMMED, ''),
+                'app_course_id' => new external_value(PARAM_INT, ''),
+                'category_name' => new external_value(PARAM_RAW_TRIMMED, '')
+            ]
+        );
     }
 
     /**
@@ -121,7 +142,9 @@ class local_formationsapi_api extends external_api
                 '*',
             );
 
-        return $category->id ?? core_course_category::create(['name' => $category_name, 'idnumber' => $category_name])->id;
+        return $category->id ?? core_course_category::create(
+                ['name' => $category_name, 'idnumber' => $category_name]
+            )->id;
     }
 
     /**
@@ -135,9 +158,12 @@ class local_formationsapi_api extends external_api
     {
         global $DB;
 
-        self::validate_parameters(self::close_course_parameters(), [
-            'app_course_id' => $app_course_id,
-        ]);
+        self::validate_parameters(
+            self::close_course_parameters(),
+            [
+                'app_course_id' => $app_course_id,
+            ]
+        );
 
         if ($course = $DB->get_record('course', ['idnumber' => $app_course_id])) {
             $course->visible = 0;
@@ -146,6 +172,15 @@ class local_formationsapi_api extends external_api
         }
 
         return ['success' => false];
+    }
+
+    public static function close_course_parameters(): external_function_parameters
+    {
+        return new external_function_parameters(
+            [
+                'app_course_id' => new external_value(PARAM_INT, 'Course ID on the Conference platform'),
+            ]
+        );
     }
 
     /**
@@ -175,16 +210,11 @@ class local_formationsapi_api extends external_api
 
     public static function delete_course_parameters(): external_function_parameters
     {
-        return new external_function_parameters([
-            'app_course_id' => new external_value(PARAM_INT, 'Course ID on the Conference platform'),
-        ]);
-    }
-
-    public static function close_course_parameters(): external_function_parameters
-    {
-        return new external_function_parameters([
-            'app_course_id' => new external_value(PARAM_INT, 'Course ID on the Conference platform'),
-        ]);
+        return new external_function_parameters(
+            [
+                'app_course_id' => new external_value(PARAM_INT, 'Course ID on the Conference platform'),
+            ]
+        );
     }
 
     /**
@@ -193,26 +223,37 @@ class local_formationsapi_api extends external_api
      * @throws \invalid_parameter_exception
      * @throws \coding_exception
      */
-    public static function enrol_user($user_email, $user_firstname, $user_lastname, $app_course_id, $role_shortname): array
-    {
+    public static function enrol_user(
+        $user_email,
+        $user_firstname,
+        $user_lastname,
+        $app_course_id,
+        $role_shortname
+    ): array {
         global $DB;
 
-        self::validate_parameters(self::enrol_user_parameters(), [
-            'user_email' => $user_email,
-            'user_firstname' => $user_firstname,
-            'user_lastname' => $user_lastname,
-            'course_id' => $app_course_id,
-            'role_shortname' => $role_shortname
-        ]);
+        self::validate_parameters(
+            self::enrol_user_parameters(),
+            [
+                'user_email' => $user_email,
+                'user_firstname' => $user_firstname,
+                'user_lastname' => $user_lastname,
+                'course_id' => $app_course_id,
+                'role_shortname' => $role_shortname
+            ]
+        );
 
         $user_email = strtolower($user_email);
 
-        $user = $DB->get_record('user', [
-            'username' => $user_email,
-            'auth' => 'shibboleth',
-            'suspended' => 0,
-            'deleted' => 0
-        ]);
+        $user = $DB->get_record(
+            'user',
+            [
+                'username' => $user_email,
+                'auth' => 'shibboleth',
+                'suspended' => 0,
+                'deleted' => 0
+            ]
+        );
 
         if (!$user) {
             $user_data = (object)['email' => $user_email, 'firstname' => $user_firstname, 'lastname' => $user_lastname];
@@ -227,7 +268,7 @@ class local_formationsapi_api extends external_api
     /**
      * @return \external_function_parameters
      */
-    public static function unenrol_user_parameters(): external_function_parameters
+    public static function enrol_user_parameters(): external_function_parameters
     {
         return new external_function_parameters(
             [
@@ -235,72 +276,11 @@ class local_formationsapi_api extends external_api
                 'user_firstname' => new external_value(PARAM_RAW_TRIMMED, 'User firstname'),
                 'user_lastname' => new external_value(PARAM_RAW_TRIMMED, 'User lastname'),
                 'course_id' => new external_value(PARAM_INT, 'Course ID'),
+                'role_shortname' => new external_value(
+                    PARAM_ALPHA, 'Role shortname to assign to the user (student|teacher)'
+                )
             ]
         );
-    }
-
-    /**
-     * @throws \invalid_parameter_exception
-     * @throws \dml_exception
-     * @throws \coding_exception
-     */
-    public static function unenrol_user($user_email, $user_firstname, $user_lastname, $app_course_id): array
-    {
-        global $DB;
-        self::validate_parameters(
-            self::unenrol_user_parameters(),
-            [
-                'user_email' => $user_email,
-                'user_firstname' => $user_firstname,
-                'user_lastname' => $user_lastname,
-                'course_id' => $app_course_id,
-            ]
-        );
-        $course_id = $DB->get_record(
-            'course',
-            ['idnumber' => $app_course_id],
-            '*',
-            MUST_EXIST
-        )->id;
-        $context = context_course::instance($course_id);
-
-        $user = $DB->get_record('user', [
-            'username' => $user_email,
-        ]);
-
-        if (is_enrolled($context, $user->id)) {
-            $plugin_instance = $DB->get_record("enrol", ['courseid' => $course_id, 'enrol' => 'manual']);
-            $plugin = enrol_get_plugin('manual');
-            $plugin->unenrol_user($plugin_instance, $user->id);
-        }
-
-        return ['success' => true];
-    }
-
-    /**
-     * @return \external_single_structure
-     */
-    public static function unenrol_user_returns()
-    {
-        return new external_single_structure([
-             'success' => new external_value(PARAM_BOOL, 'True')
-         ]);
-    }
-
-    /**
-     * @return \external_function_parameters
-     */
-    public static function enrol_user_parameters(): external_function_parameters
-    {
-        return new external_function_parameters([
-            'user_email' => new external_value(PARAM_EMAIL, 'User email'),
-            'user_firstname' => new external_value(PARAM_RAW_TRIMMED, 'User firstname'),
-            'user_lastname' => new external_value(PARAM_RAW_TRIMMED, 'User lastname'),
-            'course_id' => new external_value(PARAM_INT, 'Course ID'),
-            'role_shortname' => new external_value(
-                PARAM_ALPHA, 'Role shortname to assign to the user (student|teacher)'
-            )
-        ]);
     }
 
     /**
@@ -333,7 +313,6 @@ class local_formationsapi_api extends external_api
         return $DB->get_record('user', ['id' => $newuserid], '*', MUST_EXIST);
     }
 
-
     /**
      * @throws \coding_exception
      * @throws \dml_exception
@@ -357,5 +336,73 @@ class local_formationsapi_api extends external_api
         }
 
         return true;
+    }
+
+    /**
+     * @throws \invalid_parameter_exception
+     * @throws \dml_exception
+     * @throws \coding_exception
+     */
+    public static function unenrol_user($user_email, $user_firstname, $user_lastname, $app_course_id): array
+    {
+        global $DB;
+        self::validate_parameters(
+            self::unenrol_user_parameters(),
+            [
+                'user_email' => $user_email,
+                'user_firstname' => $user_firstname,
+                'user_lastname' => $user_lastname,
+                'course_id' => $app_course_id,
+            ]
+        );
+        $course_id = $DB->get_record(
+            'course',
+            ['idnumber' => $app_course_id],
+            '*',
+            MUST_EXIST
+        )->id;
+        $context = context_course::instance($course_id);
+
+        $user = $DB->get_record(
+            'user',
+            [
+                'username' => $user_email,
+            ]
+        );
+
+        if (is_enrolled($context, $user->id)) {
+            $plugin_instance = $DB->get_record("enrol", ['courseid' => $course_id, 'enrol' => 'manual']);
+            $plugin = enrol_get_plugin('manual');
+            $plugin->unenrol_user($plugin_instance, $user->id);
+        }
+
+        return ['success' => true];
+    }
+
+    /**
+     * @return \external_function_parameters
+     */
+    public static function unenrol_user_parameters(): external_function_parameters
+    {
+        return new external_function_parameters(
+            [
+                'user_email' => new external_value(PARAM_EMAIL, 'User email'),
+                'user_firstname' => new external_value(PARAM_RAW_TRIMMED, 'User firstname'),
+                'user_lastname' => new external_value(PARAM_RAW_TRIMMED, 'User lastname'),
+                'course_id' => new external_value(PARAM_INT, 'Course ID'),
+            ]
+        );
+    }
+
+    /**
+     * @return \external_single_structure
+     */
+    public static function unenrol_user_returns()
+    {
+        return new external_single_structure(
+            [
+                'success' => new external_value(PARAM_BOOL, 'True')
+            ]
+        );
     }
 }
