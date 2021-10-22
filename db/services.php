@@ -50,4 +50,13 @@ $functions = [
         'ajax' => true,
         'capabilities' => 'enrol/manual:enrol',
     ],
+    'local_formationsapi_unenrol_user' => [
+        'classname' => 'local_formationsapi_api',
+        'methodname' => 'unenrol_user',
+        'classpath' => 'local/formationsapi/classes/api/local_formationsapi_api.php',
+        'description' => 'Unenrol user from course.',
+        'type' => 'write',
+        'ajax' => true,
+        'capabilities' => 'enrol/manual:unenrol',
+    ],
 ];

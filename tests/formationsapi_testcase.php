@@ -130,6 +130,10 @@ class formationsapi_testcase extends advanced_testcase
         local_formationsapi_api::enrol_user('random@example.com', 'Arthur', 'Pendragon', 4, 'student');
         $user = $DB->get_record('user', ['username' => 'random@example.com']);
         self::assertTrue(is_enrolled(context_course::instance($course->id), $user->id));
+
+        //unenrolment
+        local_formationsapi_api::unenrol_user($user->email, $user->firstname, $user->lastname, 4);
+        self::assertFalse(is_enrolled(context_course::instance($course->id), $user->id));
     }
 
     /**

@@ -227,6 +227,69 @@ class local_formationsapi_api extends external_api
     /**
      * @return \external_function_parameters
      */
+    public static function unenrol_user_parameters(): external_function_parameters
+    {
+        return new external_function_parameters(
+            [
+                'user_email' => new external_value(PARAM_EMAIL, 'User email'),
+                'user_firstname' => new external_value(PARAM_RAW_TRIMMED, 'User firstname'),
+                'user_lastname' => new external_value(PARAM_RAW_TRIMMED, 'User lastname'),
+                'course_id' => new external_value(PARAM_INT, 'Course ID'),
+            ]
+        );
+    }
+
+    /**
+     * @throws \invalid_parameter_exception
+     * @throws \dml_exception
+     * @throws \coding_exception
+     */
+    public static function unenrol_user($user_email, $user_firstname, $user_lastname, $app_course_id): array
+    {
+        global $DB;
+        self::validate_parameters(
+            self::unenrol_user_parameters(),
+            [
+                'user_email' => $user_email,
+                'user_firstname' => $user_firstname,
+                'user_lastname' => $user_lastname,
+                'course_id' => $app_course_id,
+            ]
+        );
+        $course_id = $DB->get_record(
+            'course',
+            ['idnumber' => $app_course_id],
+            '*',
+            MUST_EXIST
+        )->id;
+        $context = context_course::instance($course_id);
+
+        $user = $DB->get_record('user', [
+            'username' => $user_email,
+        ]);
+
+        if (is_enrolled($context, $user->id)) {
+            $plugin_instance = $DB->get_record("enrol", ['courseid' => $course_id, 'enrol' => 'manual']);
+            $plugin = enrol_get_plugin('manual');
+            $plugin->unenrol_user($plugin_instance, $user->id);
+        }
+
+        return ['success' => true];
+    }
+
+    /**
+     * @return \external_single_structure
+     */
+    public static function unenrol_user_returns()
+    {
+        return new external_single_structure([
+             'success' => new external_value(PARAM_BOOL, 'True')
+         ]);
+    }
+
+    /**
+     * @return \external_function_parameters
+     */
     public static function enrol_user_parameters(): external_function_parameters
     {
         return new external_function_parameters([

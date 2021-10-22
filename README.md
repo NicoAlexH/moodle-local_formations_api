@@ -49,3 +49,14 @@ Example call :
 returns 
 
 `{"success": true}`
+
+- **local_formationsapi_unenrol_user(String user_email, String user_firstname, String user_lastname, Int app_course_id): success**
+
+This method allows to unenrol a user from a course by specifying user informationand a conference course id.
+
+Example call :
+`[MOODLE_URL]/webservice/rest/server.php?wstoken=[YOUR_TOKEN]&wsfunction=local_formationsapi_unenrol_user&user_email=toto@toto.com&user_firstname=Toto&user_lastname=Tutu&app_course_id=3&moodlewsrestformat=json`
+
+returns
+
+`{"success": true}`
