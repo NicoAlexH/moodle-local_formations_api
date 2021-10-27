@@ -27,6 +27,21 @@ class local_formationsapi_observer
     }
 
     /**
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * Maintains the consistency between users shibboleth groups and category manager roles
+     */
+    public static function set_user_role(core\event\base $event): void
+    {
+        global $DB;
+        $shibboleth_groups = explode(';', $_SERVER['unilMemberOf']);
+        $manager_role = $DB->get_record('role', ['shortname' => 'manager']);
+
+        self::assign_roles($shibboleth_groups, $manager_role->id, $event->userid);
+        self::unassign_roles($shibboleth_groups, $manager_role->id, $event->userid);
+    }
+
+    /**
      * Parses the course_completion_updated event in order to get the user course completion info
      * @param \core\event\base $event
      * @return array
@@ -134,5 +149,51 @@ class local_formationsapi_observer
         );
 
         return false;
+    }
+
+    /**
+     * @param array $shibboleth_groups
+     * @param int $manager_role_id
+     * @param int $userid
+     * @return mixed
+     * @throws \coding_exception|\dml_exception
+     */
+    public static function assign_roles(array $shibboleth_groups, int $manager_role_id, $userid): void
+    {
+        global $DB;
+        $prefix = get_config('local_formationsapi', 'admin_groups_prefix') ?: 'app-cours-admin-';
+
+        foreach ($shibboleth_groups as $group_name) {
+            if (strpos($group_name, $prefix) !== false) {
+                $category_name = str_replace($prefix, '', $group_name);
+                $category = $DB->get_record('course_categories', ['name' => $category_name]);
+                role_assign($manager_role_id, $userid, context_coursecat::instance($category->id));
+            }
+        }
+    }
+
+    /**
+     * @param array $shibboleth_groups
+     * @param int $manager_role_id
+     * @param int $userid
+     * @throws \coding_exception|\dml_exception
+     */
+    public static function unassign_roles(array $shibboleth_groups, int $manager_role_id, int $userid): void
+    {
+        global $DB;
+        $user_manager_roles = $DB->get_records(
+            'role_assignments',
+            ['userid' => $userid, 'roleid' => $manager_role_id]
+        );
+        $prefix = get_config('local_formationsapi', 'admin_groups_prefix') ?: 'app-cours-admin-';
+
+        foreach ($user_manager_roles as $role) {
+            $category_id = $DB->get_record('context', ['id' => $role->contextid], 'instanceid')->instanceid;
+            $category = $DB->get_record('course_categories', ['id' => $category_id]);
+
+            if ($category && !in_array($prefix . $category->name, $shibboleth_groups, true)) {
+                role_unassign($manager_role_id, $userid, $role->contextid);
+            }
+        }
     }
 }

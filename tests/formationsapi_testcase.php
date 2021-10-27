@@ -176,6 +176,28 @@ class formationsapi_testcase extends advanced_testcase
         );
     }
 
+    /**
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public function test_user_manager_role_attribution_and_removal(): void
+    {
+        $this->resetAfterTest();
+        global $DB;
+        $user = self::getDataGenerator()->create_user(['id' => 1, 'username' => 'nalexand']);
+        $category = self::getDataGenerator()->create_category(['name' => 'test']);
+        $prefix = get_config('local_formationsapi', 'admin_groups_prefix') ?: 'app-cours-admin-';
+        $shibboleth_groups = [$prefix . 'test'];
+        $manager_role = $DB->get_record('role', ['shortname' => 'manager']);
+
+        self::assertFalse(user_has_role_assignment($user->id, $manager_role->id, context_coursecat::instance($category->id)->id));
+        $this->observer::assign_roles($shibboleth_groups, $manager_role->id, $user->id);
+        self::assertTrue(user_has_role_assignment($user->id, $manager_role->id, context_coursecat::instance($category->id)->id));
+        //manager role unassignment
+        $shibboleth_groups = [];
+        $this->observer::unassign_roles($shibboleth_groups, $manager_role->id, $user->id);
+        self::assertFalse(user_has_role_assignment($user->id, $manager_role->id, context_coursecat::instance($category->id)->id));
+    }
 
     protected function setUp(): void
     {

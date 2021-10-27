@@ -43,6 +43,15 @@ if ($hassiteconfig) {
                 PARAM_RAW
             )
         );
+        $settingspage->add(
+            new admin_setting_configtext(
+                'local_formationsapi/admin_groups_prefix',
+                get_string('apikey_description', 'local_formationsapi'),
+                '',
+                'app-cours-admin-',
+                PARAM_RAW
+            )
+        );
     }
 
     $ADMIN->add('localplugins', $settingspage);
