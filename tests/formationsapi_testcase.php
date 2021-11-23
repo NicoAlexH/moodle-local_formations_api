@@ -185,7 +185,7 @@ class formationsapi_testcase extends advanced_testcase
         $this->resetAfterTest();
         global $DB;
         $user = self::getDataGenerator()->create_user(['id' => 1, 'username' => 'nalexand']);
-        $category = self::getDataGenerator()->create_category(['name' => 'test']);
+        $category = self::getDataGenerator()->create_category(['idnumber' => 'test']);
         $prefix = get_config('local_formationsapi', 'admin_groups_prefix') ?: 'app-cours-admin-';
         $shibboleth_groups = [$prefix . 'test'];
         $manager_role = $DB->get_record('role', ['shortname' => 'manager']);
