@@ -6,7 +6,7 @@ if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.'); //  It must be included from a Moodle page
 }
 
-class formationsapi_testcase extends advanced_testcase
+class formationsapi_test extends advanced_testcase
 {
     private $observer;
 
