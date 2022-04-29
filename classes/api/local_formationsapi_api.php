@@ -93,7 +93,7 @@ class local_formationsapi_api extends external_api
 
         $data = (object)[
             'fullname' => $course_title,
-            'shortname' => $course_title,
+            'shortname' => $course_title . ' - ' . $app_course_id,
             'idnumber' => $app_course_id,
             'category' => $category_id,
             'enablecompletion' => 1
