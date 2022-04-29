@@ -33,7 +33,7 @@ class formationsapi_test extends advanced_testcase
         self::assertEquals($category->id, $course->category);
         self::assertEquals(1, $course->visible);
         self::assertEquals($course_name, $course->fullname);
-        self::assertEquals($course_name, $course->shortname);
+        self::assertEquals($course_name . ' - ' . $app_course_id, $course->shortname);
     }
 
     /**
@@ -59,7 +59,7 @@ class formationsapi_test extends advanced_testcase
         self::assertEquals($category->id, $course->category);
         self::assertEquals(1, $course->visible);
         self::assertEquals($course_name, $course->fullname);
-        self::assertEquals($course_name, $course->shortname . ' - ' . $app_course_id);
+        self::assertEquals($course_name . ' - ' . $app_course_id, $course->shortname);
     }
 
     /**
