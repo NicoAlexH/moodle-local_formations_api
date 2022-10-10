@@ -18,7 +18,7 @@ class local_formationsapi_observer
         $data = self::parse_event($event);
 
         if ($data['courseId'] > 0 && !is_null($data['completion'])) {
-            return self::call_api('PUT', $url, $data) === 200
+            return in_array(self::call_api('PUT', $url, $data), [200, 204], true)
                 ? self::clean_failed_api_calls($data)
                 : self::process_error($data);
         }
