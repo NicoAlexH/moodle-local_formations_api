@@ -82,6 +82,8 @@ class local_formationsapi_observer
      */
     public static function call_api($method, $url, $data = []): int
     {
+        global $DB;
+
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -97,7 +99,26 @@ class local_formationsapi_observer
             ]
         );
 
-        $exec = curl_exec($ch) !== false;
+        $result = curl_exec($ch);
+        $exec = $result !== false;
+
+        // Fire event logging.
+        $course = $DB->get_record('course', ['idnumber' => $data['courseId']]);
+        $affecteduser = $DB->get_record('user', ['email' => $data['participantEmail']]);
+        $eventparams = array(
+                'context' => context_course::instance($course->id),
+                'relateduserid' => $affecteduser->id,
+                'other'   => json_encode([
+                        'method'   => $method,
+                        'url'      => $url,
+                        'data'     => $data,
+                        'result'   => $result,
+                        'httpcode' => curl_getinfo($ch, CURLINFO_HTTP_CODE)
+                ])
+        );
+        $event = \local_formationsapi\event\api_called::create($eventparams);
+        $event->add_record_snapshot('course', $course);
+        $event->trigger();
 
 
         if ($exec) {
